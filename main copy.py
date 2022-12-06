@@ -17,11 +17,7 @@ def CreateBoard(Positions, BoxSize, PieceColors):
     Screen = ImageGrab.grab((Positions["P1x"], Positions["P1y"], Positions["P2x"], Positions["P2y"]))
 
     Board = [[0 for x in range(10)] for y in range(20)] 
-
-    Ender = 0
-    for i in range(20):
-        if Screen.getpixel((math.floor(BoxSize.x / 2), math.floor(i * BoxSize.y + BoxSize.y / 2))) == (106,106,106):
-            Ender += 1
+    for i in range(1, 20):
         for j in range(10):
             PixColor = Screen.getpixel((math.floor(j * BoxSize.x + BoxSize.x / 2), math.floor(i * BoxSize.y + BoxSize.y / 2)))
             if PixColor in PieceColors.keys():
@@ -33,54 +29,42 @@ def CreateBoard(Positions, BoxSize, PieceColors):
     else:
         Piece = None
     
-    return Board, Piece, Ender
+    return Board, Piece
 
-def ScoreBoard(NewBoard, Ender):
+def ScoreBoard(NewBoard):
 
     HoleScore = 0
     Height = 0
     for j in range(10):
-        i = 1
+        i = 0
         while i != 20 and NewBoard[i][j] != 1:
             
             i += 1
         
-        if 20 - i > Height:
-            Height = 20 - i
+        if 19 - i > Height:
+            Height = 19 - i
         while i != 20:
             if NewBoard[i][j] == 0:
                 HoleScore += 1
             i += 1
 
-    LineClears = -Ender
-    for i in range(20):
-        k = 1
-        for j in range(1, 10):
-            if NewBoard[i][j] == 0:
-                k = 0
-        if k == 1:
-            LineClears += 1
-
     RoughScore = 0
-    i1 = 1
+    i1 = 0
     while i1 != 20 and NewBoard[i1][0] != 1:
         i1 += 1
-
     for j in range(9):
         i2 = i1
-        i1 = 1
+        i1 = 0
         while i1 != 20 and NewBoard[i1][j + 1] != 1:
             i1 += 1
         RoughScore += abs(i2-i1)
-    
-    # print(10 * HoleScore, 1 * RoughScore, 2 * Height, (16 - LineClears ** 2))
-    # print(HoleScore, RoughScore, Height, LineClears)
-    Score = 10 * HoleScore + 1 * RoughScore + 2 * Height + 0.5 * (16 - LineClears ** 2)
-    
+
+    Score = 10 * HoleScore + 2 * RoughScore + 2 * Height
+    print(HoleScore, RoughScore, Height)
     return Score
 
 def PlacedBoard(Board, Piece, Pos, Rotation):
-    i = 1
+    i = 0
     if Piece == "Bar":
         if Rotation == 0 or Rotation == 2:
             while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i + 1][Pos + 2] == 0 and Board[i + 1][Pos + 3] == 0:
@@ -224,57 +208,73 @@ def PlacedBoard(Board, Piece, Pos, Rotation):
             Board[i][Pos] = 1
             return Board
 
-def FindSpot(Board, Piece, Hold, PieceGeometry, Ender):
+def FindSpot(Board, Piece, Hold, PieceGeometry):
+    k = 0
+    for j in range(1,10):
+        i = 0
+        while i != 19 and Board[i][j] == 0:
+            i += 1
+        k += i
+    i = 0
+    while i != 19 and Board[i][0] == 0:
+        i += 1
+    if k / 9 <= i - 4:
+        if Piece == "Bar":
+            return 0, 1, 0        
+        if Hold == "Bar":
+            return 0, 1, 1
+    
+    x = random.randint(0,1)
 
     Scores = [[32767 for x in range(10)] for y in range(8)]
     Board = np.array(Board)
-    x = 0
 
     for i in range(x, 11 - PieceGeometry[Piece][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 0)
-        Scores[0][i] = ScoreBoard(NewBoard, Ender)
+        Scores[0][i] = ScoreBoard(NewBoard)
 
     for i in range(x, 11 - PieceGeometry[Piece][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 2)
-        Scores[2][i] = ScoreBoard(NewBoard, Ender)
+        Scores[2][i] = ScoreBoard(NewBoard)
     
     for i in range(x, 11 - PieceGeometry[Piece][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 1)
-        Scores[1][i] = ScoreBoard(NewBoard, Ender)
+        Scores[1][i] = ScoreBoard(NewBoard)
     
     for i in range(x, 11 - PieceGeometry[Piece][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 3)
-        Scores[3][i] = ScoreBoard(NewBoard, Ender)
+        Scores[3][i] = ScoreBoard(NewBoard)
 
     for i in range(x, 11 - PieceGeometry[Hold][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 0)
-        Scores[4][i] = ScoreBoard(NewBoard, Ender)
+        Scores[4][i] = ScoreBoard(NewBoard)
 
     for i in range(x, 11 - PieceGeometry[Hold][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 2)
-        Scores[6][i] = ScoreBoard(NewBoard, Ender)
+        Scores[6][i] = ScoreBoard(NewBoard)
     
     for i in range(x, 11 - PieceGeometry[Hold][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 1)
-        Scores[5][i] = ScoreBoard(NewBoard, Ender)
+        Scores[5][i] = ScoreBoard(NewBoard)
 
     for i in range(x, 11 - PieceGeometry[Hold][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 3)
-        Scores[7][i] = ScoreBoard(NewBoard, Ender)
+        Scores[7][i] = ScoreBoard(NewBoard)
 
     index = [0, 0]
     for i in range(8):
         for j in range(10):
             if Scores[i][j] < Scores[index[0]][index[1]]:
                 index = [i, j]
+    print(index)
     if index[0] <= 3:
         return index[1], index[0], 0
     else:
@@ -508,7 +508,7 @@ def main():
 
     GameSize = Point(Positions["P2x"] - Positions["P1x"], Positions["P2y"] - Positions["P1y"])
 
-    BoxSize = Point(GameSize.x / 10, GameSize.y / 20)
+    BoxSize = Point(math.floor(GameSize.x / 10), math.floor(GameSize.y / 20))
 
     PieceColors = {(15, 155, 215): "Bar",
                    (175, 41, 138): "T",
@@ -516,9 +516,7 @@ def main():
                    (89, 177, 1): "S",
                    (215, 15, 55): "Z",
                    (227, 91, 2): "L",
-                   (33, 65, 198): "J",
-                   (153, 153, 153): "Garbage",
-                   (106,106,106): "Ender"}
+                   (33, 65, 198): "J",}
 
     PieceGeometry = {"Bar": [4, 1],
                      "T": [3, 2],
@@ -531,26 +529,15 @@ def main():
     Time = 0
     
     time.sleep(2)
-    pyautogui.dragTo(Positions["P1x"], Positions["P1y"])
-    pyautogui.click()
-    Board, Piece, Ender = CreateBoard(Positions, BoxSize, PieceColors)
+    Board, Piece = CreateBoard(Positions, BoxSize, PieceColors)
     Hold = "Bar"
     pyautogui.press('c')
-    print("Waiting...")
 
     while not keyboard.is_pressed('Esc'):
-        Board, Piece, Ender = CreateBoard(Positions, BoxSize, PieceColors)
+        Board, Piece = CreateBoard(Positions, BoxSize, PieceColors)
         if Piece != None:
-            
-            Spot, Rotation, Chosen = FindSpot(Board, Piece, Hold, PieceGeometry, Ender)
-            print("__________")
-            for i in range(20):
-                for j in range(10):
-                    if Board[i][j] == 1:
-                        print("#", end = "")
-                    else:
-                        print(" ", end = "")
-                print("")
+            Spot, Rotation, Chosen = FindSpot(Board, Piece, Hold, PieceGeometry)
+            print(Spot, Rotation, Chosen)
             Hold = PlacePiece(Piece, Hold, Spot, Rotation, Chosen, Time)
     return
 
