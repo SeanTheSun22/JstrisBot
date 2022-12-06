@@ -1,0 +1,192 @@
+def ScoreBoard(Board):
+
+    HoleScore = 0
+    for j in range(10):
+        i = 0
+        while i != 20 and Board[i][j] != 1:
+            i += 1
+
+        while i != 20:
+            if Board[i][j] == 0:
+                HoleScore += 1
+            i += 1
+
+    RoughScore = 0
+    i1 = 0
+    while i1 != 20 and Board[i1][0] != 1:
+        i1 += 1
+    for j in range(9):
+        i2 = i1
+        i1 = 0
+        while i1 != 20 and Board[i1][j + 1] != 1:
+            i1 += 1
+        RoughScore += abs(i2-i1)
+
+
+    print(HoleScore)
+    print(RoughScore)
+    Score = 0.5 * HoleScore + 0.5 * RoughScore
+    return Score
+
+def PlacedBoard(Board, Piece, Pos, Rotation):
+    i = 0
+    if Piece == "Bar":
+        if Rotation == 0 or Rotation == 2:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i + 1][Pos + 2] == 0 and Board[i + 1][Pos + 3] == 0:
+                i += 1
+            for j in range(4):
+                Board[i-j][Pos] = 1
+            return Board
+        if Rotation == 1 or Rotation == 3:
+            while i != 19 and Board[i + 1][Pos] == 0:
+                i += 1
+            for j in range(4):
+                Board[i][Pos + j] = 1
+            return Board
+            
+    if Piece == "T":
+        if Rotation == 0:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i + 1][Pos + 2] == 0:
+                i += 1
+            for j in range(3):
+                Board[i][Pos + j] = 1
+            Board[i - 1][Pos + 1] = 1
+            return Board
+        if Rotation == 1:
+            while i != 19 and Board[i][Pos + 1] == 0 and Board[i + 1][Pos] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - j][Pos] = 1
+            Board[i - 1][Pos + 1] = 1
+            return Board
+        if Rotation == 2:
+            while i != 19 and Board[i][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i][Pos + 2] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - 1][Pos + j] = 1
+            Board[i][Pos + 1] = 1
+            return Board
+        if Rotation == 3:
+            while i != 19 and Board[i][Pos] == 0 and Board[i + 1][Pos + 1] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - j][Pos + 1] = 1
+            Board[i - 1][Pos] = 1
+            return Board
+
+    if Piece == "Box":
+        while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0:
+            i += 1
+        for j in range(2):
+            Board[i][Pos + j] = 1
+            Board[i - 1][Pos + j] = 1
+        return Board
+    if Piece == "S":
+        if Rotation == 0 or Rotation == 2:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i][Pos + 2] == 0:
+                i += 1
+            for j in range(2):
+                Board[i][Pos + j] = 1
+                Board[i - 1][Pos + j + 1] = 1
+            return Board
+        if Rotation == 1 or Rotation == 3:
+            while i != 19 and Board[i][Pos] == 0 and Board[i + 1][Pos + 1] == 0:
+                i += 1
+            for j in range(2):
+                Board[i - j - 1][Pos] = 1
+                Board[i - j][Pos + 1] = 1
+            return Board
+    if Piece == "Z":
+        if Rotation == 0 or Rotation == 2:
+            while i != 19 and Board[i][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i + 1][Pos + 2] == 0:
+                i += 1
+            for j in range(2):
+                Board[i][Pos + j + 1] = 1
+                Board[i - 1][Pos + j] = 1
+            return Board
+        if Rotation == 1 or Rotation == 3:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i][Pos + 1] == 0:
+                i += 1
+            for j in range(2):
+                Board[i - j][Pos] = 1
+                Board[i - j - 1][Pos + 1] = 1
+            return Board
+    if Piece == "L":
+        if Rotation == 0:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i + 1][Pos + 2] == 0:
+                i += 1
+            for j in range(3):
+                Board[i][Pos + j] = 1
+            Board[i - 1][Pos + 2] = 1
+            return Board
+        if Rotation == 1:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - j][Pos] = 1
+            Board[i][Pos + 1] = 1
+            return Board
+        if Rotation == 2:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i][Pos + 1] == 0 and Board[i][Pos + 2] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - 1][Pos + j] = 1
+            Board[i][Pos] = 1
+            return Board
+        if Rotation == 3:
+            i += 1
+            while i != 19 and Board[i - 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - j][Pos + 1] = 1
+            Board[i - 2][Pos] = 1
+            return Board
+
+    if Piece == "J":
+        if Rotation == 0:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0 and Board[i + 1][Pos + 2] == 0:
+                i += 1
+            for j in range(3):
+                Board[i][Pos + j] = 1
+            Board[i - 1][Pos] = 1
+            return Board
+        if Rotation == 1:
+            i += 1
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i - 1][Pos + 1] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - j][Pos] = 1
+            Board[i - 2][Pos + 1] = 1
+            return Board
+        if Rotation == 2:
+            while i != 19 and Board[i][Pos] == 0 and Board[i][Pos + 1] == 0 and Board[i + 1][Pos + 2] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - 1][Pos + j] = 1
+            Board[i][Pos + 2] = 1
+            return Board
+        if Rotation == 3:
+            while i != 19 and Board[i + 1][Pos] == 0 and Board[i + 1][Pos + 1] == 0:
+                i += 1
+            for j in range(3):
+                Board[i - j][Pos + 1] = 1
+            Board[i][Pos] = 1
+            return Board
+
+
+Board = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0, 0, 0], [1, 1, 0, 0, 0, 0, 0, 0, 0, 0]]
+
+for i in Board:
+    for j in i:
+        print(j, end = "")
+    print("")
+print("")
+
+Board = PlacedBoard(Board, "S", 0, 0)
+
+for i in Board:
+    for j in i:
+        print(j, end = "")
+    print("")
+
+ScoreBoard(Board)
