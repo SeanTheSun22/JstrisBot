@@ -5,7 +5,6 @@ from PIL import ImageGrab
 import time
 import pyautogui
 import numpy as np
-import random
 
 class Point:
     def __init__(self, x, y):
@@ -35,7 +34,7 @@ def CreateBoard(Positions, BoxSize, PieceColors):
     
     return Board, Piece, Ender
 
-def ScoreBoard(NewBoard, Ender):
+def ScoreBoard(NewBoard, Piece, Rotation, Ender):
 
     HoleScore = 0
     Height = 0
@@ -55,7 +54,7 @@ def ScoreBoard(NewBoard, Ender):
     LineClears = -Ender
     for i in range(20):
         k = 1
-        for j in range(1, 10):
+        for j in range(10):
             if NewBoard[i][j] == 0:
                 k = 0
         if k == 1:
@@ -73,9 +72,12 @@ def ScoreBoard(NewBoard, Ender):
             i1 += 1
         RoughScore += abs(i2-i1)
     
+    if LineClears >= 3 and Piece == "Bar" and Rotation == 1:
+        return 0
+
     # print(10 * HoleScore, 1 * RoughScore, 2 * Height, (16 - LineClears ** 2))
     # print(HoleScore, RoughScore, Height, LineClears)
-    Score = 10 * HoleScore + 1 * RoughScore + 2 * Height + 0.5 * (16 - LineClears ** 2)
+    Score = 10 * HoleScore + 1 * RoughScore + 2 * (Height - LineClears) + (9 - LineClears ** 2)
     
     return Score
 
@@ -233,48 +235,49 @@ def FindSpot(Board, Piece, Hold, PieceGeometry, Ender):
     for i in range(x, 11 - PieceGeometry[Piece][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 0)
-        Scores[0][i] = ScoreBoard(NewBoard, Ender)
+        Scores[0][i] = ScoreBoard(NewBoard, Piece, 0, Ender)
 
     for i in range(x, 11 - PieceGeometry[Piece][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 2)
-        Scores[2][i] = ScoreBoard(NewBoard, Ender)
+        Scores[2][i] = ScoreBoard(NewBoard, Piece, 2, Ender)
     
     for i in range(x, 11 - PieceGeometry[Piece][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 1)
-        Scores[1][i] = ScoreBoard(NewBoard, Ender)
+        Scores[1][i] = ScoreBoard(NewBoard, Piece, 1, Ender)
     
     for i in range(x, 11 - PieceGeometry[Piece][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Piece, i, 3)
-        Scores[3][i] = ScoreBoard(NewBoard, Ender)
+        Scores[3][i] = ScoreBoard(NewBoard, Piece, 3, Ender)
 
     for i in range(x, 11 - PieceGeometry[Hold][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 0)
-        Scores[4][i] = ScoreBoard(NewBoard, Ender)
+        Scores[4][i] = ScoreBoard(NewBoard, Hold, 0, Ender)
 
     for i in range(x, 11 - PieceGeometry[Hold][0]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 2)
-        Scores[6][i] = ScoreBoard(NewBoard, Ender)
+        Scores[6][i] = ScoreBoard(NewBoard, Hold, 2, Ender)
     
     for i in range(x, 11 - PieceGeometry[Hold][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 1)
-        Scores[5][i] = ScoreBoard(NewBoard, Ender)
+        Scores[5][i] = ScoreBoard(NewBoard, Hold, 1, Ender)
 
     for i in range(x, 11 - PieceGeometry[Hold][1]):
         NewBoard = Board.copy()
         NewBoard = PlacedBoard(NewBoard, Hold, i, 3)
-        Scores[7][i] = ScoreBoard(NewBoard, Ender)
+        Scores[7][i] = ScoreBoard(NewBoard, Hold, 3, Ender)
 
     index = [0, 0]
     for i in range(8):
         for j in range(10):
             if Scores[i][j] < Scores[index[0]][index[1]]:
                 index = [i, j]
+    print(np.array(Scores))
     if index[0] <= 3:
         return index[1], index[0], 0
     else:
@@ -304,6 +307,8 @@ def PlacePiece(Piece, Hold, Spot, Rotation, Chosen, Time):
             pyautogui.press('space')
             return Hold
         if Rotation == 2:
+            pyautogui.press('up')
+            pyautogui.press('up')
             if Spot <= 2:
                 pyautogui.press('left', presses = 3 - Spot)
             else:
@@ -311,6 +316,8 @@ def PlacePiece(Piece, Hold, Spot, Rotation, Chosen, Time):
             pyautogui.press('space')
             return Hold
         if Rotation == 3:
+            pyautogui.press('up')
+            pyautogui.press('up')
             pyautogui.press('up')
             if Spot <= 3:
                 pyautogui.press('left', presses = 4 - Spot)    
